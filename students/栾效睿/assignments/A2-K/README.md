@@ -295,12 +295,12 @@ forward-backward p50，显存列为 peak reserved MiB，speedup 相对同 shape 
 
 ## 飞书补充文档
 
-- 链接：https://fudan-nlp.feishu.cn/wiki/GxurwYrHlidvquk5x8Tc6bCjnrd。
+- 链接：https://fudan-nlp.feishu.cn/wiki/GxurwYrHlidvquk5x8Tc6bCjnrd
 
 ## 自检
 
 - [x] 本 PR 只包含我本人本次 A2-K 的文件。
-- [x] 正式结果来自单张 RTX 4090 24GB，且开跑前可用显存不少于 22 GiB。
+- [ ] 正式结果来自单张 RTX 4090 24GB，且开跑前可用显存不少于 22 GiB。
 - [x] 每个正式脚本独立、串行执行，首次 CUDA allocation 前设置 23552 MiB allocator 上限。
 - [x] README 是 Markdown 主报告，所有图片使用相对路径和有意义的 alt text。
 - [x] checkpoint、baseline、compile、正确性与 Flash benchmark 的必交结果齐全。

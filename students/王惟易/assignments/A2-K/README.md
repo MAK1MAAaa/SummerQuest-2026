@@ -285,9 +285,11 @@ CUDA_VISIBLE_DEVICES=0 uv run python student_scripts/a2k/run_flash_benchmark_mat
 
 各入口在第一次 CUDA allocation 前检查可见设备数、开跑前空闲显存，并设置 23552 MiB allocator 上限。不同实现或 shape 均由矩阵 runner 启动独立 Python 进程，避免编译缓存、allocator 和存活张量跨配置污染。
 
-## 组织内补充材料
+## 飞书补充文档
 
-无。本作业的实验配置、轻量结果、实现、分析与脱敏图表均适合公开，README 已包含完整报告，因此不另建与 README 重复的飞书补充文档。
+- 链接：https://fudan-nlp.feishu.cn/wiki/MyC8wtMoGibeZBkkMt0cKmvAnGf
+
+本次作业没有必须仅在组织内保存的敏感材料。补充文档仅简要登记完成范围、正式实验边界和结果摘要，不重复 GitHub README；链接分享范围为组织内可阅读，未开启互联网公开链接。
 
 ## 自检
 
@@ -304,4 +306,4 @@ CUDA_VISIBLE_DEVICES=0 uv run python student_scripts/a2k/run_flash_benchmark_mat
 - [x] 未提交 compile cache、PTX/CUBIN、binary、完整 trace、上游仓库或依赖环境。
 - [x] GitHub 内容不含内部主机名、IP、账号、路径、UUID、进程或未公开项目。
 - [x] GitHub 正文不含 Secret、Token、Cookie、密码或私钥。
-- [x] 本作业没有仅限组织内的差量材料，无需另建重复的飞书补充文档。
+- [x] 飞书补充文档已创建并设置为组织内可阅读；本次没有额外的敏感差量材料。

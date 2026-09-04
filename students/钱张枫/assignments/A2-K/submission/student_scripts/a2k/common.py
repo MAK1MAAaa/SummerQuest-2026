@@ -484,7 +484,12 @@ def write_csv(path: Path, fieldnames: Sequence[str], rows: Sequence[Mapping[str,
             prefix=f".{path.name}.",
             suffix=".tmp",
         ) as temporary:
-            writer = csv.DictWriter(temporary, fieldnames=list(fieldnames), extrasaction="ignore")
+            writer = csv.DictWriter(
+                temporary,
+                fieldnames=list(fieldnames),
+                extrasaction="ignore",
+                lineterminator="\n",
+            )
             writer.writeheader()
             for row in rows:
                 writer.writerow({field: "" if row.get(field) is None else row.get(field) for field in fieldnames})

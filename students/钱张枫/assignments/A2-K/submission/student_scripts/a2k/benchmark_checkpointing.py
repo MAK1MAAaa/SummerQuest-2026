@@ -68,6 +68,8 @@ CSV_FIELDS = [
     "step_time_ms_p50",
     "peak_allocated_mib",
     "peak_reserved_mib",
+    "allocator_fraction",
+    "allocator_limit_mib",
     "status",
     "error_kind",
     "formal",
@@ -121,6 +123,8 @@ def measure_configuration(
     warmup_steps: int,
     measurement_steps: int,
     formal: bool,
+    allocator_fraction: float,
+    allocator_limit_mib: float,
 ) -> dict[str, Any]:
     """Measure one complete training-step configuration and retain OOM evidence."""
 
@@ -140,6 +144,8 @@ def measure_configuration(
         "step_time_ms_p50": None,
         "peak_allocated_mib": None,
         "peak_reserved_mib": None,
+        "allocator_fraction": allocator_fraction,
+        "allocator_limit_mib": allocator_limit_mib,
         "status": "runtime_error",
         "error_kind": "runtime_error",
         "formal": formal,
@@ -316,6 +322,8 @@ def main() -> int:
             "step_time_ms_p50": None,
             "peak_allocated_mib": None,
             "peak_reserved_mib": None,
+            "allocator_fraction": None,
+            "allocator_limit_mib": None,
             "status": error.status,
             "error_kind": "cuda_preflight",
             "formal": formal,
@@ -355,6 +363,8 @@ def main() -> int:
                 warmup_steps=args.warmup_steps,
                 measurement_steps=args.measurement_steps,
                 formal=formal,
+                allocator_fraction=runtime.allocator_fraction,
+                allocator_limit_mib=float(ALLOCATOR_LIMIT_MIB),
             )
         )
 
@@ -374,6 +384,8 @@ def main() -> int:
             warmup_steps=args.warmup_steps,
             measurement_steps=args.measurement_steps,
             formal=formal,
+            allocator_fraction=runtime.allocator_fraction,
+            allocator_limit_mib=float(ALLOCATOR_LIMIT_MIB),
         )
     )
     if checkpoint_successes:
@@ -386,6 +398,8 @@ def main() -> int:
                 warmup_steps=args.warmup_steps,
                 measurement_steps=args.measurement_steps,
                 formal=formal,
+                allocator_fraction=runtime.allocator_fraction,
+                allocator_limit_mib=float(ALLOCATOR_LIMIT_MIB),
             )
         )
     else:
@@ -405,6 +419,8 @@ def main() -> int:
                 "step_time_ms_p50": None,
                 "peak_allocated_mib": None,
                 "peak_reserved_mib": None,
+                "allocator_fraction": runtime.allocator_fraction,
+                "allocator_limit_mib": float(ALLOCATOR_LIMIT_MIB),
                 "status": "not_run_missing_1024_checkpoint_success",
                 "error_kind": "missing_prerequisite",
                 "formal": formal,

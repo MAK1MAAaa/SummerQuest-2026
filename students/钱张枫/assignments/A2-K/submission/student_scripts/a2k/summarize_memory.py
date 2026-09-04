@@ -114,6 +114,8 @@ def _read_json_observations(path: Path) -> list[MemoryObservation]:
     if isinstance(runs, list):
         for item in runs:
             if isinstance(item, Mapping):
+                if "observation_count" in content and item.get("source") != source:
+                    continue
                 observations.append(_observation_from_mapping(source, cast(Mapping[str, object], item), default_script=default_script))
         return observations
 
@@ -199,9 +201,25 @@ def summarize(observations: Sequence[MemoryObservation]) -> dict[str, object]:
         (observation.allocator_limit_mib for observation in reversed(observations) if observation.allocator_limit_mib is not None),
         None,
     )
+    successful_observations = [observation for observation in observations if observation.status == "success"]
+    missing_allocator_evidence = [
+        observation
+        for observation in successful_observations
+        if observation.allocator_fraction is None or observation.allocator_limit_mib is None
+    ]
+    allocator_evidence_complete = not missing_allocator_evidence
+    if max_reserved is None:
+        status = "unavailable"
+        within_allocator_guard: bool | None = None
+    elif not allocator_evidence_complete:
+        status = "incomplete_evidence"
+        within_allocator_guard = None
+    else:
+        status = "success"
+        within_allocator_guard = max_reserved <= ALLOCATOR_LIMIT_MIB
     return {
         "schema_version": 1,
-        "status": "success" if max_reserved is not None else "unavailable",
+        "status": status,
         "allocator": {
             "allocator_fraction": allocator_fraction,
             "allocator_limit_mib": allocator_limit,
@@ -210,9 +228,11 @@ def summarize(observations: Sequence[MemoryObservation]) -> dict[str, object]:
         "hard_limit_mib": HARD_MEMORY_LIMIT_MIB,
         "pytorch_peak_allocated_mib": round(max_allocated, 3) if max_allocated is not None else None,
         "pytorch_peak_reserved_mib": round(max_reserved, 3) if max_reserved is not None else None,
-        "within_allocator_guard": None if max_reserved is None else max_reserved <= ALLOCATOR_LIMIT_MIB,
+        "allocator_evidence_complete": allocator_evidence_complete,
+        "missing_allocator_evidence_count": len(missing_allocator_evidence),
+        "within_allocator_guard": within_allocator_guard,
         "within_hard_limit": None if max_reserved is None else max_reserved <= HARD_MEMORY_LIMIT_MIB,
-        "within_24gib": None if max_reserved is None else max_reserved <= ALLOCATOR_LIMIT_MIB,
+        "within_24gib": within_allocator_guard,
         "observation_count": len(observations),
         "runs": [observation.as_json() for observation in observations],
     }
@@ -253,6 +273,12 @@ def run(*, input_dir: Path, inputs: Sequence[Path], output: Path | None) -> int:
     if not observations:
         stderr("No formal observed memory peaks were found; memory_evidence.json was written as unavailable.")
         return 2
+    if payload["allocator_evidence_complete"] is not True:
+        stderr(
+            "Formal success observations are missing allocator_fraction or allocator_limit_mib; "
+            "memory_evidence.json was written as incomplete evidence."
+        )
+        return 1
     if errors:
         stderr("Some input artifacts could not be read; inspect input_errors in memory_evidence.json.")
         return 1
